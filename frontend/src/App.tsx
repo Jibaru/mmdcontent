@@ -3,13 +3,58 @@ import "./App.css";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { MainContent } from "@/components/shared/MainContent";
 
+export type ViewState = {
+	view: string;
+	detailType?: "model" | "stage";
+	detailItem?: {
+		id: string;
+		name: string;
+		screenshots: string[];
+		description: string;
+		originalPath: string;
+	};
+};
+
 export default function App() {
-	const [currentView, setCurrentView] = useState("models");
+	const [viewState, setViewState] = useState<ViewState>({ view: "models" });
+
+	const handleViewChange = (view: string) => {
+		setViewState({ view });
+	};
+
+	const handleShowDetail = (
+		type: "model" | "stage",
+		item: {
+			id: string;
+			name: string;
+			screenshots: string[];
+			description: string;
+			originalPath: string;
+		}
+	) => {
+		setViewState({
+			view: "detail",
+			detailType: type,
+			detailItem: item,
+		});
+	};
+
+	const handleBackFromDetail = () => {
+		if (viewState.detailType === "model") {
+			setViewState({ view: "models" });
+		} else if (viewState.detailType === "stage") {
+			setViewState({ view: "stages" });
+		}
+	};
 
 	return (
 		<div className="flex h-screen overflow-hidden">
-			<Sidebar currentView={currentView} onViewChange={setCurrentView} />
-			<MainContent view={currentView} />
+			<Sidebar currentView={viewState.view} onViewChange={handleViewChange} />
+			<MainContent
+				viewState={viewState}
+				onShowDetail={handleShowDetail}
+				onBackFromDetail={handleBackFromDetail}
+			/>
 		</div>
 	);
 }

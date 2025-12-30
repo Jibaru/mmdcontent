@@ -12,7 +12,20 @@ import {
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { MMDContentCard } from "../../shared/MMDContentCard";
 
-export function StagesGrid() {
+interface StagesGridProps {
+	onShowDetail: (
+		type: "model" | "stage",
+		item: {
+			id: string;
+			name: string;
+			screenshots: string[];
+			description: string;
+			originalPath: string;
+		}
+	) => void;
+}
+
+export function StagesGrid({ onShowDetail }: StagesGridProps) {
 	const [paginatedData, setPaginatedData] =
 		useState<main.PaginatedStages | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -108,6 +121,7 @@ export function StagesGrid() {
 						name={stage.name}
 						screenshots={stage.screenshots}
 						description={stage.description}
+						onClick={() => onShowDetail("stage", stage)}
 					/>
 				))}
 			</div>
