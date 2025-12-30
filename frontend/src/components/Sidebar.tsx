@@ -1,34 +1,25 @@
 import {
 	LayoutDashboard,
-	MessageSquare,
-	Bot,
-	FileText,
-	Image,
-	Volume2,
-	Users,
+	Box,
+	Layers,
 	Settings,
-	CreditCard,
-	History,
-	Lock,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
+interface SidebarProps {
+	currentView: string;
+	onViewChange: (view: string) => void;
+}
+
 const menuItems = [
-	{ icon: LayoutDashboard, label: "Main Dashboard", active: true },
-	{ icon: Bot, label: "AI Assistant", active: false },
-	{ icon: MessageSquare, label: "AI Chat UI", active: false },
-	{ icon: FileText, label: "AI Text Generator", active: false },
-	{ icon: Image, label: "AI Image Generator", active: false },
-	{ icon: Volume2, label: "AI Text to Speech", active: false },
-	{ icon: Users, label: "Users List", active: false },
-	{ icon: Settings, label: "Profile Settings", active: false },
-	{ icon: CreditCard, label: "Subscription", active: false },
-	{ icon: History, label: "History", active: false },
-	{ icon: Lock, label: "Authentication", active: false },
+	{ icon: LayoutDashboard, label: "Main Dashboard", view: "dashboard" },
+	{ icon: Box, label: "Models", view: "models" },
+	{ icon: Layers, label: "Stages", view: "stages" },
+	{ icon: Settings, label: "Settings", view: "settings" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ currentView, onViewChange }: SidebarProps) {
 	return (
 		<div className="w-64 h-screen bg-white border-r border-border flex flex-col">
 			{/* Logo */}
@@ -47,8 +38,9 @@ export function Sidebar() {
 					<button
 						key={item.label}
 						type="button"
+						onClick={() => onViewChange(item.view)}
 						className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${
-							item.active
+							currentView === item.view
 								? "bg-black text-white"
 								: "text-muted-foreground hover:bg-muted"
 						}`}
