@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GetImageAsBase64 } from "../../wailsjs/go/main/App";
+import { GetImageAsBase64 } from "../../../../wailsjs/go/main/App";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";

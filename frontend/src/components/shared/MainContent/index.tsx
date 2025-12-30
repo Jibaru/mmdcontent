@@ -1,4 +1,4 @@
-import { ModelsGrid } from "./ModelsGrid";
+import { ModelsGrid } from "../../screens/ModelsGrid";
 
 interface MainContentProps {
 	view: string;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { GetModels } from "../../wailsjs/go/main/App";
-import { main } from "../../wailsjs/go/models";
+import { GetModels } from "../../../../wailsjs/go/main/App";
+import { main } from "../../../../wailsjs/go/models";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
-import { MMDContentCard } from "./MMDContentCard";
+import { MMDContentCard } from "../../shared/MMDContentCard";
 
 export function ModelsGrid() {
 	const [paginatedData, setPaginatedData] =
