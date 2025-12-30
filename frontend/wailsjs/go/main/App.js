@@ -6,6 +6,10 @@ export function GetAllModels() {
   return window['go']['main']['App']['GetAllModels']();
 }
 
+export function GetAllStages() {
+  return window['go']['main']['App']['GetAllStages']();
+}
+
 export function GetImageAsBase64(arg1) {
   return window['go']['main']['App']['GetImageAsBase64'](arg1);
 }
@@ -14,10 +18,18 @@ export function GetModels(arg1, arg2) {
   return window['go']['main']['App']['GetModels'](arg1, arg2);
 }
 
+export function GetStages(arg1, arg2) {
+  return window['go']['main']['App']['GetStages'](arg1, arg2);
+}
+
 export function Quit() {
   return window['go']['main']['App']['Quit']();
 }
 
 export function RefreshModelsData() {
   return window['go']['main']['App']['RefreshModelsData']();
+}
+
+export function RefreshStagesData() {
+  return window['go']['main']['App']['RefreshStagesData']();
 }

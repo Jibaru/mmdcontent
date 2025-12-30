@@ -15,6 +15,7 @@ type App struct {
 	ctx         context.Context
 	isMinimized bool
 	modelsData  *ModelsData
+	stagesData  *StagesData
 }
 
 func NewApp() *App {
@@ -42,6 +43,23 @@ func (a *App) startup(ctx context.Context) {
 	} else {
 		a.modelsData = modelsData
 		fmt.Printf("Loaded %d models\n", len(modelsData.Models))
+	}
+
+	// Parse stages data on startup
+	err = ParseStagesData()
+	if err != nil {
+		fmt.Printf("Error parsing stages data: %v\n", err)
+	} else {
+		fmt.Println("Stages data parsed successfully")
+	}
+
+	// Load stages data
+	stagesData, err := LoadStagesData()
+	if err != nil {
+		fmt.Printf("Error loading stages data: %v\n", err)
+	} else {
+		a.stagesData = stagesData
+		fmt.Printf("Loaded %d stages\n", len(stagesData.Stages))
 	}
 }
 
@@ -82,6 +100,46 @@ func (a *App) RefreshModelsData() error {
 	}
 
 	a.modelsData = modelsData
+	return nil
+}
+
+// GetStages returns paginated stages
+func (a *App) GetStages(page, perPage int) PaginatedStages {
+	if a.stagesData == nil {
+		return PaginatedStages{
+			Stages:     []Stage{},
+			Total:      0,
+			Page:       page,
+			PerPage:    perPage,
+			TotalPages: 0,
+		}
+	}
+
+	return a.stagesData.GetPaginatedStages(page, perPage)
+}
+
+// GetAllStages returns all stages without pagination
+func (a *App) GetAllStages() []Stage {
+	if a.stagesData == nil {
+		return []Stage{}
+	}
+
+	return a.stagesData.Stages
+}
+
+// RefreshStagesData re-parses and reloads the stages data
+func (a *App) RefreshStagesData() error {
+	err := ParseStagesData()
+	if err != nil {
+		return err
+	}
+
+	stagesData, err := LoadStagesData()
+	if err != nil {
+		return err
+	}
+
+	a.stagesData = stagesData
 	return nil
 }
 

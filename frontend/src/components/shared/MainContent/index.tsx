@@ -1,4 +1,5 @@
 import { ModelsGrid } from "../../screens/ModelsGrid";
+import { StagesGrid } from "../../screens/StagesGrid";
 
 interface MainContentProps {
 	view: string;
@@ -22,11 +23,7 @@ export function MainContent({ view }: MainContentProps) {
 			{/* Content */}
 			<div className="p-8">
 				{view === "models" && <ModelsGrid />}
-				{view === "stages" && (
-					<div className="text-center text-muted-foreground py-12">
-						Stages view coming soon...
-					</div>
-				)}
+				{view === "stages" && <StagesGrid />}
 				{view === "dashboard" && (
 					<div className="text-center text-muted-foreground py-12">
 						Dashboard statistics coming soon...

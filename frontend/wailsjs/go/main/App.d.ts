@@ -4,10 +4,16 @@ import {main} from '../models';
 
 export function GetAllModels():Promise<Array<main.Model>>;
 
+export function GetAllStages():Promise<Array<main.Stage>>;
+
 export function GetImageAsBase64(arg1:string):Promise<string>;
 
 export function GetModels(arg1:number,arg2:number):Promise<main.PaginatedModels>;
 
+export function GetStages(arg1:number,arg2:number):Promise<main.PaginatedStages>;
+
 export function Quit():Promise<void>;
 
 export function RefreshModelsData():Promise<void>;
+
+export function RefreshStagesData():Promise<void>;
