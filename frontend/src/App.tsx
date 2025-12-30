@@ -1,11 +1,12 @@
 import "./App.css";
-
-function MainApp() {
-	return <main>Hello!</main>
-}
+import { Sidebar } from "@/components/Sidebar";
+import { Dashboard } from "@/components/Dashboard";
 
 export default function App() {
 	return (
-		<MainApp />
+		<div className="flex h-screen overflow-hidden">
+			<Sidebar />
+			<Dashboard />
+		</div>
 	);
 }
