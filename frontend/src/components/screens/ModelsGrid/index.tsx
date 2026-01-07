@@ -28,7 +28,7 @@ interface ModelsGridProps {
 
 export function ModelsGrid({ onShowDetail }: ModelsGridProps) {
 	const [paginatedData, setPaginatedData] =
-		useState<entities.PaginatedModels | null>(null);
+		useState<entities.Pagination_MMDContent_internal_entities_Model_ | null>(null);
 	const [searchResults, setSearchResults] = useState<entities.Model[] | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [searching, setSearching] = useState(false);
@@ -105,7 +105,7 @@ export function ModelsGrid({ onShowDetail }: ModelsGridProps) {
 	};
 
 	// Use search results if searching, otherwise use paginated data
-	const displayData = searchResults || paginatedData?.models || [];
+	const displayData = searchResults || paginatedData?.data || [];
 	const isSearching = searchResults !== null;
 
 	if (loading && !paginatedData && !searchResults) {
@@ -116,7 +116,7 @@ export function ModelsGrid({ onShowDetail }: ModelsGridProps) {
 		);
 	}
 
-	if (!isSearching && (!paginatedData || paginatedData.models.length === 0)) {
+	if (!isSearching && (!paginatedData || paginatedData.data.length === 0)) {
 		return (
 			<div className="flex items-center justify-center h-64">
 				<div className="text-muted-foreground">No models found</div>

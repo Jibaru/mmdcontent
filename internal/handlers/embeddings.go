@@ -8,10 +8,13 @@ import (
 
 	"MMDContent/internal/entities"
 	"MMDContent/internal/services/openai"
+	"MMDContent/internal/storage"
 )
 
 type Embeddings struct {
-	client openai.Client
+	client        openai.Client
+	modelsStorage *storage.Models
+	stagesStorage *storage.Stages
 }
 
 func NewEmbeddings(
@@ -38,22 +41,20 @@ func (e *Embeddings) GenerateAll() {
 
 // GenerateModelsEmbeddings generates embeddings for all models
 func (e *Embeddings) GenerateModelsEmbeddings() error {
-	// Load existing models data
-	modelsData, err := entities.LoadModelsData()
+	err := e.modelsStorage.Refresh()
 	if err != nil {
 		return err
 	}
 
-	totalModels := len(modelsData.Models)
+	totalModels := e.modelsStorage.Total()
 	skippedCount := 0
 	updatedCount := 0
 	failedCount := 0
 
 	fmt.Printf("   Found %d models total\n", totalModels)
 
-	for i := range modelsData.Models {
-		model := &modelsData.Models[i]
-
+	updatedModels := make([]entities.Model, totalModels)
+	for i, model := range e.modelsStorage.Get().Models {
 		// Skip if embedding already exists
 		if len(model.Embedding) > 0 {
 			skippedCount++
@@ -78,6 +79,8 @@ func (e *Embeddings) GenerateModelsEmbeddings() error {
 
 		// Small delay to avoid rate limits (optional, adjust based on your API tier)
 		time.Sleep(100 * time.Millisecond)
+
+		updatedModels[i] = model
 	}
 
 	fmt.Printf("\n   ✅ Generated: %d | ⏭️  Skipped: %d | ❌ Failed: %d\n", updatedCount, skippedCount, failedCount)
@@ -85,7 +88,8 @@ func (e *Embeddings) GenerateModelsEmbeddings() error {
 	// Save updated data back to file
 	if updatedCount > 0 {
 		fmt.Println("   💾 Saving models data...")
-		if err := entities.SaveModelsData(modelsData); err != nil {
+		e.modelsStorage.Set(&entities.ModelsData{Models: updatedModels})
+		if err := e.modelsStorage.Save(); err != nil {
 			return err
 		}
 		fmt.Println("   ✅ Models data saved successfully")
@@ -98,22 +102,20 @@ func (e *Embeddings) GenerateModelsEmbeddings() error {
 
 // GenerateStagesEmbeddings generates embeddings for all stages
 func (e *Embeddings) GenerateStagesEmbeddings() error {
-	// Load existing stages data
-	stagesData, err := entities.LoadStagesData()
+	err := e.modelsStorage.Refresh()
 	if err != nil {
 		return err
 	}
 
-	totalStages := len(stagesData.Stages)
+	totalStages := e.stagesStorage.Total()
 	skippedCount := 0
 	updatedCount := 0
 	failedCount := 0
 
 	fmt.Printf("   Found %d stages total\n", totalStages)
 
-	for i := range stagesData.Stages {
-		stage := &stagesData.Stages[i]
-
+	updatedStages := make([]entities.Stage, totalStages)
+	for i, stage := range e.stagesStorage.Get().Stages {
 		// Skip if embedding already exists
 		if len(stage.Embedding) > 0 {
 			skippedCount++
@@ -138,6 +140,8 @@ func (e *Embeddings) GenerateStagesEmbeddings() error {
 
 		// Small delay to avoid rate limits
 		time.Sleep(100 * time.Millisecond)
+
+		updatedStages[i] = stage
 	}
 
 	fmt.Printf("\n   ✅ Generated: %d | ⏭️  Skipped: %d | ❌ Failed: %d\n", updatedCount, skippedCount, failedCount)
@@ -145,7 +149,8 @@ func (e *Embeddings) GenerateStagesEmbeddings() error {
 	// Save updated data back to file
 	if updatedCount > 0 {
 		fmt.Println("   💾 Saving stages data...")
-		if err := entities.SaveStagesData(stagesData); err != nil {
+		e.stagesStorage.Set(&entities.StagesData{Stages: updatedStages})
+		if err := e.stagesStorage.Save(); err != nil {
 			return err
 		}
 		fmt.Println("   ✅ Stages data saved successfully")

@@ -84,10 +84,10 @@ func (a *Stages) GetAllStages() []entities.Stage {
 }
 
 // GetStages returns paginated stages
-func (a *Stages) GetStages(page, perPage int) entities.PaginatedStages {
+func (a *Stages) GetStages(page, perPage int) entities.Pagination[entities.Stage] {
 	if a.stagesStorage.IsEmpty() {
-		return entities.PaginatedStages{
-			Stages:     []entities.Stage{},
+		return entities.Pagination[entities.Stage]{
+			Data:       []entities.Stage{},
 			Total:      0,
 			Page:       page,
 			PerPage:    perPage,
@@ -95,21 +95,15 @@ func (a *Stages) GetStages(page, perPage int) entities.PaginatedStages {
 		}
 	}
 
-	return a.stagesStorage.Get().GetPaginatedStages(page, perPage)
+	return a.stagesStorage.GetPaginatedStages(page, perPage)
 }
 
 // RefreshStagesData re-parses and reloads the stages data
 func (a *Stages) RefreshStagesData() error {
-	err := entities.ParseStagesData()
+	err := a.stagesStorage.Refresh()
 	if err != nil {
 		return err
 	}
 
-	stagesData, err := entities.LoadStagesData()
-	if err != nil {
-		return err
-	}
-
-	a.stagesStorage.Set(stagesData)
 	return nil
 }

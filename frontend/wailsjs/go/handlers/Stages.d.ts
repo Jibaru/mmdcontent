@@ -4,7 +4,7 @@ import {entities} from '../models';
 
 export function GetAllStages():Promise<Array<entities.Stage>>;
 
-export function GetStages(arg1:number,arg2:number):Promise<entities.PaginatedStages>;
+export function GetStages(arg1:number,arg2:number):Promise<entities.Pagination_MMDContent_internal_entities_Stage_>;
 
 export function RefreshStagesData():Promise<void>;
 

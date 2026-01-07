@@ -75,10 +75,10 @@ func (a *Models) SearchModels(query string, limit int) ([]entities.Model, error)
 }
 
 // GetModels returns paginated models
-func (a *Models) GetModels(page, perPage int) entities.PaginatedModels {
+func (a *Models) GetModels(page, perPage int) entities.Pagination[entities.Model] {
 	if a.modelsStorage.IsEmpty() {
-		return entities.PaginatedModels{
-			Models:     []entities.Model{},
+		return entities.Pagination[entities.Model]{
+			Data:       []entities.Model{},
 			Total:      0,
 			Page:       page,
 			PerPage:    perPage,
@@ -86,7 +86,7 @@ func (a *Models) GetModels(page, perPage int) entities.PaginatedModels {
 		}
 	}
 
-	return a.modelsStorage.Get().GetPaginatedModels(page, perPage)
+	return a.modelsStorage.GetPaginatedModels(page, perPage)
 }
 
 // GetAllModels returns all models without pagination
@@ -100,16 +100,10 @@ func (a *Models) GetAllModels() []entities.Model {
 
 // RefreshModelsData re-parses and reloads the models data
 func (a *Models) RefreshModelsData() error {
-	err := entities.ParseModelsData()
+	err := a.modelsStorage.Refresh()
 	if err != nil {
 		return err
 	}
 
-	modelsData, err := entities.LoadModelsData()
-	if err != nil {
-		return err
-	}
-
-	a.modelsStorage.Set(modelsData)
 	return nil
 }

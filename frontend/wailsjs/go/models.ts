@@ -22,20 +22,20 @@ export namespace entities {
 	        this.embedding = source["embedding"];
 	    }
 	}
-	export class PaginatedModels {
-	    models: Model[];
+	export class Pagination_MMDContent_internal_entities_Model_ {
+	    data: Model[];
 	    total: number;
 	    page: number;
 	    perPage: number;
 	    totalPages: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new PaginatedModels(source);
+	        return new Pagination_MMDContent_internal_entities_Model_(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.models = this.convertValues(source["models"], Model);
+	        this.data = this.convertValues(source["data"], Model);
 	        this.total = source["total"];
 	        this.page = source["page"];
 	        this.perPage = source["perPage"];
@@ -82,20 +82,20 @@ export namespace entities {
 	        this.embedding = source["embedding"];
 	    }
 	}
-	export class PaginatedStages {
-	    stages: Stage[];
+	export class Pagination_MMDContent_internal_entities_Stage_ {
+	    data: Stage[];
 	    total: number;
 	    page: number;
 	    perPage: number;
 	    totalPages: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new PaginatedStages(source);
+	        return new Pagination_MMDContent_internal_entities_Stage_(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.stages = this.convertValues(source["stages"], Stage);
+	        this.data = this.convertValues(source["data"], Stage);
 	        this.total = source["total"];
 	        this.page = source["page"];
 	        this.perPage = source["perPage"];

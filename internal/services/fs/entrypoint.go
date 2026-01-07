@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"MMDContent/internal/entities"
+	"MMDContent/internal/storage"
 )
 
 func SyncFiles() (*entities.ModelsData, *entities.StagesData, error) {
@@ -15,14 +16,14 @@ func SyncFiles() (*entities.ModelsData, *entities.StagesData, error) {
 
 	// Parse models data if changes detected or JSON doesn't exist
 	if NeedsSync(modelsChanges) || !fileExists("data/data.json") {
-		err := entities.ParseModelsData()
+		err := storage.ParseModelsData()
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
 	// Load models data
-	modelsData, err := entities.LoadModelsData()
+	modelsData, err := storage.LoadModelsData()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -36,14 +37,14 @@ func SyncFiles() (*entities.ModelsData, *entities.StagesData, error) {
 
 	// Parse stages data if changes detected or JSON doesn't exist
 	if NeedsSync(stagesChanges) || !fileExists("data/stages.json") {
-		err = entities.ParseStagesData()
+		err = storage.ParseStagesData()
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
 	// Load stages data
-	stagesData, err := entities.LoadStagesData()
+	stagesData, err := storage.LoadStagesData()
 	if err != nil {
 		return nil, nil, err
 	}

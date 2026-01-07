@@ -4,7 +4,7 @@ import {entities} from '../models';
 
 export function GetAllModels():Promise<Array<entities.Model>>;
 
-export function GetModels(arg1:number,arg2:number):Promise<entities.PaginatedModels>;
+export function GetModels(arg1:number,arg2:number):Promise<entities.Pagination_MMDContent_internal_entities_Model_>;
 
 export function RefreshModelsData():Promise<void>;
 
