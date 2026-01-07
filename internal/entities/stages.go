@@ -12,11 +12,3 @@ type Stage struct {
 type StagesData struct {
 	Stages []Stage `json:"stages"`
 }
-
-type PaginatedStages struct {
-	Stages     []Stage `json:"stages"`
-	Total      int     `json:"total"`
-	Page       int     `json:"page"`
-	PerPage    int     `json:"perPage"`
-	TotalPages int     `json:"totalPages"`
-}
