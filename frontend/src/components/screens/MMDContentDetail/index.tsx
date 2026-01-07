@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GetImageAsBase64 } from "../../../../wailsjs/go/main/App";
+import { GetImageAsBase64 } from "../../../../wailsjs/go/handlers/Images";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";

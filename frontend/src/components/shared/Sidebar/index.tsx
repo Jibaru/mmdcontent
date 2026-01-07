@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GenerateEmbeddingsForAll } from "../../../../wailsjs/go/main/App";
+import { GenerateAll } from "../../../../wailsjs/go/handlers/Embeddings";
 
 interface SidebarProps {
 	currentView: string;
@@ -32,7 +32,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
 		setEmbeddingStatus("Generating AI embeddings...");
 
 		try {
-			await GenerateEmbeddingsForAll();
+			await GenerateAll();
 			setEmbeddingStatus("✓ Embeddings generated successfully!");
 
 			// Clear success message after 5 seconds

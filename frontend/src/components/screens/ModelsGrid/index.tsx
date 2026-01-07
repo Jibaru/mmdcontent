@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { GetModels, SearchModels } from "../../../../wailsjs/go/main/App";
-import { main } from "../../../../wailsjs/go/models";
+import { GetModels, SearchModels } from "../../../../wailsjs/go/handlers/Models";
+import { entities } from "../../../../wailsjs/go/models";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,8 +28,8 @@ interface ModelsGridProps {
 
 export function ModelsGrid({ onShowDetail }: ModelsGridProps) {
 	const [paginatedData, setPaginatedData] =
-		useState<main.PaginatedModels | null>(null);
-	const [searchResults, setSearchResults] = useState<main.Model[] | null>(null);
+		useState<entities.PaginatedModels | null>(null);
+	const [searchResults, setSearchResults] = useState<entities.Model[] | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [searching, setSearching] = useState(false);
 	const [page, setPage] = useState(1);

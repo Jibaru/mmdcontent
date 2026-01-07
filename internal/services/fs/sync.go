@@ -1,4 +1,4 @@
-package main
+package fs
 
 import (
 	"encoding/json"
@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"MMDContent/internal/entities"
 )
 
 // ChangeType represents the type of change detected
@@ -167,7 +169,7 @@ func getJSONIDs(jsonPath string) (map[string]time.Time, error) {
 
 	// Parse JSON based on file type
 	if filepath.Base(jsonPath) == "data.json" {
-		var modelsData ModelsData
+		var modelsData entities.ModelsData
 		if err := json.Unmarshal(jsonData, &modelsData); err != nil {
 			return nil, err
 		}
@@ -177,7 +179,7 @@ func getJSONIDs(jsonPath string) (map[string]time.Time, error) {
 			ids[model.ID] = baseModTime
 		}
 	} else if filepath.Base(jsonPath) == "stages.json" {
-		var stagesData StagesData
+		var stagesData entities.StagesData
 		if err := json.Unmarshal(jsonData, &stagesData); err != nil {
 			return nil, err
 		}
@@ -195,36 +197,8 @@ func NeedsSync(changes []Change) bool {
 	return len(changes) > 0
 }
 
-// PrintChanges prints a summary of detected changes
-func PrintChanges(contentType string, changes []Change) {
-	if len(changes) == 0 {
-		fmt.Printf("✅ %s: No changes detected\n", contentType)
-		return
-	}
-
-	added := 0
-	modified := 0
-	deleted := 0
-
-	for _, change := range changes {
-		switch change.Type {
-		case ChangeAdded:
-			added++
-		case ChangeModified:
-			modified++
-		case ChangeDeleted:
-			deleted++
-		}
-	}
-
-	fmt.Printf("🔄 %s changes detected:\n", contentType)
-	if added > 0 {
-		fmt.Printf("   ➕ Added: %d\n", added)
-	}
-	if modified > 0 {
-		fmt.Printf("   📝 Modified: %d\n", modified)
-	}
-	if deleted > 0 {
-		fmt.Printf("   ❌ Deleted: %d\n", deleted)
-	}
+// fileExists checks if a file exists
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { GetStages, SearchStages } from "../../../../wailsjs/go/main/App";
-import { main } from "../../../../wailsjs/go/models";
+import { GetStages, SearchStages } from "../../../../wailsjs/go/handlers/Stages";
+import { entities } from "../../../../wailsjs/go/models";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,8 +28,8 @@ interface StagesGridProps {
 
 export function StagesGrid({ onShowDetail }: StagesGridProps) {
 	const [paginatedData, setPaginatedData] =
-		useState<main.PaginatedStages | null>(null);
-	const [searchResults, setSearchResults] = useState<main.Stage[] | null>(null);
+		useState<entities.PaginatedStages | null>(null);
+	const [searchResults, setSearchResults] = useState<entities.Stage[] | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [searching, setSearching] = useState(false);
 	const [page, setPage] = useState(1);

@@ -1,4 +1,4 @@
-package main
+package entities
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type Stage struct {
+type Model struct {
 	ID           string    `json:"id"`
 	Name         string    `json:"name"`
 	Screenshots  []string  `json:"screenshots"`
@@ -17,25 +17,25 @@ type Stage struct {
 	Embedding    []float64 `json:"embedding,omitempty"`
 }
 
-type StagesData struct {
-	Stages []Stage `json:"stages"`
+type ModelsData struct {
+	Models []Model `json:"models"`
 }
 
-type PaginatedStages struct {
-	Stages      []Stage `json:"stages"`
-	Total       int     `json:"total"`
-	Page        int     `json:"page"`
-	PerPage     int     `json:"perPage"`
-	TotalPages  int     `json:"totalPages"`
+type PaginatedModels struct {
+	Models     []Model `json:"models"`
+	Total      int     `json:"total"`
+	Page       int     `json:"page"`
+	PerPage    int     `json:"perPage"`
+	TotalPages int     `json:"totalPages"`
 }
 
-// ParseStagesData reads the data/Stages directory and creates a data/stages.json file
-func ParseStagesData() error {
-	stagesDir := "data/Stages"
-	var stages []Stage
+// ParseModelsData reads the data/Models directory and creates a data.json file
+func ParseModelsData() error {
+	modelsDir := "data/Models"
+	var models []Model
 
-	// Read all directories in data/Stages
-	entries, err := os.ReadDir(stagesDir)
+	// Read all directories in data/Models
+	entries, err := os.ReadDir(modelsDir)
 	if err != nil {
 		return err
 	}
@@ -45,11 +45,11 @@ func ParseStagesData() error {
 			continue
 		}
 
-		stageID := entry.Name()
-		stagePath := filepath.Join(stagesDir, stageID)
+		modelID := entry.Name()
+		modelPath := filepath.Join(modelsDir, modelID)
 
 		// Read ruta.txt
-		rutaPath := filepath.Join(stagePath, "ruta.txt")
+		rutaPath := filepath.Join(modelPath, "ruta.txt")
 		rutaContent, err := os.ReadFile(rutaPath)
 		if err != nil {
 			continue // Skip if ruta.txt doesn't exist
@@ -57,10 +57,10 @@ func ParseStagesData() error {
 
 		// Extract filename from path
 		rutaStr := strings.TrimSpace(string(rutaContent))
-		stageName := filepath.Base(rutaStr)
+		modelName := filepath.Base(rutaStr)
 
 		// Read descripcion.txt
-		descPath := filepath.Join(stagePath, "descripcion.txt")
+		descPath := filepath.Join(modelPath, "descripcion.txt")
 		descContent, err := os.ReadFile(descPath)
 		description := ""
 		if err == nil {
@@ -68,7 +68,7 @@ func ParseStagesData() error {
 		}
 
 		// Read screenshots
-		screenshotsDir := filepath.Join(stagePath, "screenshots")
+		screenshotsDir := filepath.Join(modelPath, "screenshots")
 		var screenshots []string
 		screenshotEntries, err := os.ReadDir(screenshotsDir)
 		if err == nil {
@@ -86,34 +86,34 @@ func ParseStagesData() error {
 		// Sort screenshots
 		sort.Strings(screenshots)
 
-		stage := Stage{
-			ID:           stageID,
-			Name:         stageName,
+		model := Model{
+			ID:           modelID,
+			Name:         modelName,
 			Screenshots:  screenshots,
 			Description:  description,
 			OriginalPath: rutaStr,
 		}
 
-		stages = append(stages, stage)
+		models = append(models, model)
 	}
 
-	// Sort stages by ID
-	sort.Slice(stages, func(i, j int) bool {
-		return stages[i].ID < stages[j].ID
+	// Sort models by ID
+	sort.Slice(models, func(i, j int) bool {
+		return models[i].ID < models[j].ID
 	})
 
-	// Create StagesData struct
-	stagesData := StagesData{
-		Stages: stages,
+	// Create ModelsData struct
+	modelsData := ModelsData{
+		Models: models,
 	}
 
-	// Write to data/stages.json
-	jsonData, err := json.MarshalIndent(stagesData, "", "  ")
+	// Write to data/data.json
+	jsonData, err := json.MarshalIndent(modelsData, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	dataPath := filepath.Join("data", "stages.json")
+	dataPath := filepath.Join("data", "data.json")
 	err = os.WriteFile(dataPath, jsonData, 0644)
 	if err != nil {
 		return err
@@ -122,27 +122,27 @@ func ParseStagesData() error {
 	return nil
 }
 
-// LoadStagesData loads the stages from data/stages.json
-func LoadStagesData() (*StagesData, error) {
-	dataPath := filepath.Join("data", "stages.json")
+// LoadModelsData loads the models from data/data.json
+func LoadModelsData() (*ModelsData, error) {
+	dataPath := filepath.Join("data", "data.json")
 	jsonData, err := os.ReadFile(dataPath)
 	if err != nil {
 		return nil, err
 	}
 
-	var stagesData StagesData
-	err = json.Unmarshal(jsonData, &stagesData)
+	var modelsData ModelsData
+	err = json.Unmarshal(jsonData, &modelsData)
 	if err != nil {
 		return nil, err
 	}
 
-	return &stagesData, nil
+	return &modelsData, nil
 }
 
-// SaveStagesData saves the stages data to data/stages.json
-func SaveStagesData(stagesData *StagesData) error {
-	dataPath := filepath.Join("data", "stages.json")
-	jsonData, err := json.MarshalIndent(stagesData, "", "  ")
+// SaveModelsData saves the models data to data/data.json
+func SaveModelsData(modelsData *ModelsData) error {
+	dataPath := filepath.Join("data", "data.json")
+	jsonData, err := json.MarshalIndent(modelsData, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -155,9 +155,9 @@ func SaveStagesData(stagesData *StagesData) error {
 	return nil
 }
 
-// GetPaginatedStages returns a paginated subset of stages
-func (sd *StagesData) GetPaginatedStages(page, perPage int) PaginatedStages {
-	total := len(sd.Stages)
+// GetPaginatedModels returns a paginated subset of models
+func (md *ModelsData) GetPaginatedModels(page, perPage int) PaginatedModels {
+	total := len(md.Models)
 
 	// Calculate pagination
 	if page < 1 {
@@ -182,10 +182,10 @@ func (sd *StagesData) GetPaginatedStages(page, perPage int) PaginatedStages {
 		end = total
 	}
 
-	paginatedStages := sd.Stages[start:end]
+	paginatedModels := md.Models[start:end]
 
-	return PaginatedStages{
-		Stages:     paginatedStages,
+	return PaginatedModels{
+		Models:     paginatedModels,
 		Total:      total,
 		Page:       page,
 		PerPage:    perPage,

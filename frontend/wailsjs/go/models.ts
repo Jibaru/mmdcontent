@@ -1,4 +1,4 @@
-export namespace main {
+export namespace entities {
 	
 	export class Model {
 	    id: string;

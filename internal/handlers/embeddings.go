@@ -1,42 +1,45 @@
-package main
+package handlers
 
 import (
 	"fmt"
+	"log/slog"
+	"math"
 	"time"
+
+	"MMDContent/internal/entities"
+	"MMDContent/internal/services/openai"
 )
 
-// GenerateAllEmbeddings generates embeddings for all models and stages
-// This should be run when new content is added or descriptions change
-func GenerateAllEmbeddings() error {
-	fmt.Println("\n========================================")
-	fmt.Println("🚀 Starting AI Embedding Generation")
-	fmt.Println("========================================\n")
+type Embeddings struct {
+	client openai.Client
+}
 
-	// Generate embeddings for models
-	fmt.Println("📦 Processing Models...")
-	if err := GenerateModelsEmbeddings(); err != nil {
-		return fmt.Errorf("error generating model embeddings: %w", err)
+func NewEmbeddings(
+	client openai.Client,
+) *Embeddings {
+	return &Embeddings{
+		client: client,
 	}
+}
 
-	fmt.Println()
+func (e *Embeddings) GenerateAll() {
+	// Generate embeddings for models
+	if err := e.GenerateModelsEmbeddings(); err != nil {
+		slog.Error("error generating model embeddings", "error", err)
+		return
+	}
 
 	// Generate embeddings for stages
-	fmt.Println("🎭 Processing Stages...")
-	if err := GenerateStagesEmbeddings(); err != nil {
-		return fmt.Errorf("error generating stage embeddings: %w", err)
+	if err := e.GenerateStagesEmbeddings(); err != nil {
+		slog.Error("error generating stage embeddings", "error", err)
+		return
 	}
-
-	fmt.Println("\n========================================")
-	fmt.Println("✅ Embedding Generation Complete!")
-	fmt.Println("🔍 Search is now enabled")
-	fmt.Println("========================================\n")
-	return nil
 }
 
 // GenerateModelsEmbeddings generates embeddings for all models
-func GenerateModelsEmbeddings() error {
+func (e *Embeddings) GenerateModelsEmbeddings() error {
 	// Load existing models data
-	modelsData, err := LoadModelsData()
+	modelsData, err := entities.LoadModelsData()
 	if err != nil {
 		return err
 	}
@@ -63,7 +66,7 @@ func GenerateModelsEmbeddings() error {
 		fmt.Printf("   [%d/%d] Generating embedding for: %s\n", i+1, totalModels, model.Name)
 
 		// Generate embedding
-		embedding, err := GenerateEmbedding(text)
+		embedding, err := e.client.GenerateEmbedding(text)
 		if err != nil {
 			fmt.Printf("   ⚠️  Warning: Failed for %s: %v\n", model.ID, err)
 			failedCount++
@@ -82,7 +85,7 @@ func GenerateModelsEmbeddings() error {
 	// Save updated data back to file
 	if updatedCount > 0 {
 		fmt.Println("   💾 Saving models data...")
-		if err := SaveModelsData(modelsData); err != nil {
+		if err := entities.SaveModelsData(modelsData); err != nil {
 			return err
 		}
 		fmt.Println("   ✅ Models data saved successfully")
@@ -94,9 +97,9 @@ func GenerateModelsEmbeddings() error {
 }
 
 // GenerateStagesEmbeddings generates embeddings for all stages
-func GenerateStagesEmbeddings() error {
+func (e *Embeddings) GenerateStagesEmbeddings() error {
 	// Load existing stages data
-	stagesData, err := LoadStagesData()
+	stagesData, err := entities.LoadStagesData()
 	if err != nil {
 		return err
 	}
@@ -123,7 +126,7 @@ func GenerateStagesEmbeddings() error {
 		fmt.Printf("   [%d/%d] Generating embedding for: %s\n", i+1, totalStages, stage.Name)
 
 		// Generate embedding
-		embedding, err := GenerateEmbedding(text)
+		embedding, err := e.client.GenerateEmbedding(text)
 		if err != nil {
 			fmt.Printf("   ⚠️  Warning: Failed for %s: %v\n", stage.ID, err)
 			failedCount++
@@ -142,7 +145,7 @@ func GenerateStagesEmbeddings() error {
 	// Save updated data back to file
 	if updatedCount > 0 {
 		fmt.Println("   💾 Saving stages data...")
-		if err := SaveStagesData(stagesData); err != nil {
+		if err := entities.SaveStagesData(stagesData); err != nil {
 			return err
 		}
 		fmt.Println("   ✅ Stages data saved successfully")
@@ -151,4 +154,30 @@ func GenerateStagesEmbeddings() error {
 	}
 
 	return nil
+}
+
+// CosineSimilarity calculates the cosine similarity between two vectors
+// Returns a value between -1 and 1, where 1 means identical, 0 means orthogonal, -1 means opposite
+func CosineSimilarity(a, b []float64) float64 {
+	if len(a) != len(b) {
+		return 0
+	}
+
+	var dotProduct, normA, normB float64
+	for i := range a {
+		dotProduct += a[i] * b[i]
+		normA += a[i] * a[i]
+		normB += b[i] * b[i]
+	}
+
+	if normA == 0 || normB == 0 {
+		return 0
+	}
+
+	return dotProduct / (math.Sqrt(normA) * math.Sqrt(normB))
+}
+
+// PrepareTextForEmbedding combines name and description for better search results
+func PrepareTextForEmbedding(name, description string) string {
+	return fmt.Sprintf("Name: %s\nDescription: %s", name, description)
 }
