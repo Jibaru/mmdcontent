@@ -33,9 +33,10 @@ func main() {
 	app := NewApp(modelsStorage, stagesStorage)
 
 	err := wails.Run(&options.App{
-		Title:  "MMDContent",
-		Width:  1080,
-		Height: 720,
+		Title:            "MMDContent",
+		Width:            1080,
+		Height:           720,
+		WindowStartState: options.Maximised,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
