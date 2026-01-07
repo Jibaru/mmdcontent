@@ -2,7 +2,10 @@ module MMDContent
 
 go 1.24.0
 
-require github.com/wailsapp/wails/v2 v2.10.2
+require (
+	github.com/wailsapp/wails/v2 v2.10.2
+	golang.org/x/text v0.29.0
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
@@ -31,7 +34,6 @@ require (
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
 )
 
 // replace github.com/wailsapp/wails/v2 v2.10.2 => C:\Users\Ignac\go\pkg\mod

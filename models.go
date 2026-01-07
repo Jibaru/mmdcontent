@@ -9,11 +9,12 @@ import (
 )
 
 type Model struct {
-	ID           string   `json:"id"`
-	Name         string   `json:"name"`
-	Screenshots  []string `json:"screenshots"`
-	Description  string   `json:"description"`
-	OriginalPath string   `json:"originalPath"`
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Screenshots  []string  `json:"screenshots"`
+	Description  string    `json:"description"`
+	OriginalPath string    `json:"originalPath"`
+	Embedding    []float64 `json:"embedding,omitempty"`
 }
 
 type ModelsData struct {
@@ -136,6 +137,22 @@ func LoadModelsData() (*ModelsData, error) {
 	}
 
 	return &modelsData, nil
+}
+
+// SaveModelsData saves the models data to data/data.json
+func SaveModelsData(modelsData *ModelsData) error {
+	dataPath := filepath.Join("data", "data.json")
+	jsonData, err := json.MarshalIndent(modelsData, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(dataPath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetPaginatedModels returns a paginated subset of models

@@ -6,6 +6,7 @@ export namespace main {
 	    screenshots: string[];
 	    description: string;
 	    originalPath: string;
+	    embedding?: number[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Model(source);
@@ -18,6 +19,7 @@ export namespace main {
 	        this.screenshots = source["screenshots"];
 	        this.description = source["description"];
 	        this.originalPath = source["originalPath"];
+	        this.embedding = source["embedding"];
 	    }
 	}
 	export class PaginatedModels {
@@ -64,6 +66,7 @@ export namespace main {
 	    screenshots: string[];
 	    description: string;
 	    originalPath: string;
+	    embedding?: number[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Stage(source);
@@ -76,6 +79,7 @@ export namespace main {
 	        this.screenshots = source["screenshots"];
 	        this.description = source["description"];
 	        this.originalPath = source["originalPath"];
+	        this.embedding = source["embedding"];
 	    }
 	}
 	export class PaginatedStages {

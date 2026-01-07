@@ -9,11 +9,12 @@ import (
 )
 
 type Stage struct {
-	ID           string   `json:"id"`
-	Name         string   `json:"name"`
-	Screenshots  []string `json:"screenshots"`
-	Description  string   `json:"description"`
-	OriginalPath string   `json:"originalPath"`
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Screenshots  []string  `json:"screenshots"`
+	Description  string    `json:"description"`
+	OriginalPath string    `json:"originalPath"`
+	Embedding    []float64 `json:"embedding,omitempty"`
 }
 
 type StagesData struct {
@@ -136,6 +137,22 @@ func LoadStagesData() (*StagesData, error) {
 	}
 
 	return &stagesData, nil
+}
+
+// SaveStagesData saves the stages data to data/stages.json
+func SaveStagesData(stagesData *StagesData) error {
+	dataPath := filepath.Join("data", "stages.json")
+	jsonData, err := json.MarshalIndent(stagesData, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(dataPath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetPaginatedStages returns a paginated subset of stages
