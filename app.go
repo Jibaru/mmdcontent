@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"log/slog"
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"MMDContent/internal/services/fs"
 	"MMDContent/internal/storage"
 )
 
@@ -26,14 +24,6 @@ func NewApp(modelsStorage *storage.Models, stagesStorage *storage.Stages) *App {
 // startup is called when the app starts
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-
-	modelsData, stagesData, err := fs.SyncFiles()
-	if err != nil {
-		slog.InfoContext(ctx, "error in startup", "error", err)
-	}
-
-	a.modelsStorage.Set(modelsData)
-	a.stagesStorage.Set(stagesData)
 }
 
 // Quit closes the app

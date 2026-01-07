@@ -1,22 +1,56 @@
 package storage
 
 import (
-	"MMDContent/internal/entities"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"MMDContent/internal/entities"
 )
 
 type Models struct {
-	data *entities.ModelsData
+	data     *entities.ModelsData
+	dirName  string
+	filename string
 }
 
-func NewModels() *Models {
-	return &Models{
-		data: &entities.ModelsData{},
+func NewModelsLoaded(dirName string, filename string) (*Models, error) {
+	m := &Models{
+		dirName:  dirName,
+		filename: filename,
 	}
+
+	err := m.sync()
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
+func (m *Models) sync() error {
+	modelsDataInFolder, err := readModelsDataFromFolder(m.dirName)
+	if err != nil {
+		return err
+	}
+
+	modelsDataInJSON, err := loadModelsDataFromFile(m.filename)
+	if err != nil {
+		return err
+	}
+
+	missingModels := make([]entities.Model, 0)
+	for _, model := range modelsDataInFolder.Models {
+		if !modelsDataInJSON.Has(model) {
+			missingModels = append(missingModels, model)
+		}
+	}
+
+	modelsDataInJSON.Models = append(modelsDataInJSON.Models, missingModels...)
+	m.Set(modelsDataInJSON)
+	return m.Save()
 }
 
 func (m *Models) Get() *entities.ModelsData {
@@ -36,22 +70,21 @@ func (m *Models) Total() int {
 }
 
 func (m *Models) Refresh() error {
-	err := ParseModelsData()
-	if err != nil {
-		return err
-	}
-
-	modelsData, err := LoadModelsData()
-	if err != nil {
-		return err
-	}
-
-	m.data = modelsData
-	return nil
+	return m.sync()
 }
 
 func (m *Models) Save() error {
-	return SaveModelsData(m.data)
+	jsonData, err := json.MarshalIndent(m.data, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(m.filename, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetPaginatedModels returns a paginated subset of models
@@ -92,15 +125,28 @@ func (m *Models) GetPaginatedModels(page, perPage int) entities.Pagination[entit
 	}
 }
 
-// ParseModelsData reads the data/Models directory and creates a data.json file
-func ParseModelsData() error {
-	modelsDir := "data/Models"
+func loadModelsDataFromFile(filename string) (*entities.ModelsData, error) {
+	jsonData, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	var modelsData entities.ModelsData
+	err = json.Unmarshal(jsonData, &modelsData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &modelsData, nil
+}
+
+func readModelsDataFromFolder(dirName string) (*entities.ModelsData, error) {
 	var models []entities.Model
 
 	// Read all directories in data/Models
-	entries, err := os.ReadDir(modelsDir)
+	entries, err := os.ReadDir(dirName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, entry := range entries {
@@ -109,7 +155,7 @@ func ParseModelsData() error {
 		}
 
 		modelID := entry.Name()
-		modelPath := filepath.Join(modelsDir, modelID)
+		modelPath := filepath.Join(dirName, modelID)
 
 		// Read ruta.txt
 		rutaPath := filepath.Join(modelPath, "ruta.txt")
@@ -166,54 +212,7 @@ func ParseModelsData() error {
 	})
 
 	// Create ModelsData struct
-	modelsData := entities.ModelsData{
+	return &entities.ModelsData{
 		Models: models,
-	}
-
-	// Write to data/data.json
-	jsonData, err := json.MarshalIndent(modelsData, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	dataPath := filepath.Join("data", "data.json")
-	err = os.WriteFile(dataPath, jsonData, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// LoadModelsData loads the models from data/data.json
-func LoadModelsData() (*entities.ModelsData, error) {
-	dataPath := filepath.Join("data", "data.json")
-	jsonData, err := os.ReadFile(dataPath)
-	if err != nil {
-		return nil, err
-	}
-
-	var modelsData entities.ModelsData
-	err = json.Unmarshal(jsonData, &modelsData)
-	if err != nil {
-		return nil, err
-	}
-
-	return &modelsData, nil
-}
-
-// SaveModelsData saves the models data to data/data.json
-func SaveModelsData(modelsData *entities.ModelsData) error {
-	dataPath := filepath.Join("data", "data.json")
-	jsonData, err := json.MarshalIndent(modelsData, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(dataPath, jsonData, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	}, nil
 }

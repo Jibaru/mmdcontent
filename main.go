@@ -3,7 +3,9 @@ package main
 import (
 	"embed"
 	"log"
+	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -22,8 +24,17 @@ var icon []byte
 
 func main() {
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
-	modelsStorage := storage.NewModels()
-	stagesStorage := storage.NewStages()
+	modelsStorage, err := storage.NewModelsLoaded(filepath.Join("data", "Models"), filepath.Join("data", "models.json"))
+	if err != nil {
+		slog.Error("error loading models", "error", err)
+		return
+	}
+
+	stagesStorage, err := storage.NewStagesLoaded(filepath.Join("data", "Stages"), filepath.Join("data", "stages.json"))
+	if err != nil {
+		slog.Error("error loading stages", "error", err)
+		return
+	}
 
 	images := handlers.NewImages()
 	embeddings := handlers.NewEmbeddings(*client)
@@ -32,7 +43,7 @@ func main() {
 
 	app := NewApp(modelsStorage, stagesStorage)
 
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:            "MMDContent",
 		Width:            1080,
 		Height:           720,
