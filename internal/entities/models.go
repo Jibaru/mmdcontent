@@ -12,11 +12,3 @@ type Model struct {
 type ModelsData struct {
 	Models []Model `json:"models"`
 }
-
-type PaginatedModels struct {
-	Models     []Model `json:"models"`
-	Total      int     `json:"total"`
-	Page       int     `json:"page"`
-	PerPage    int     `json:"perPage"`
-	TotalPages int     `json:"totalPages"`
-}
