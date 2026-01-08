@@ -36,10 +36,17 @@ func main() {
 		return
 	}
 
+	motionsStorage, err := storage.NewMotionsLoaded(filepath.Join("data", "Motions"), filepath.Join("data", "motions.json"))
+	if err != nil {
+		slog.Error("error loading motions", "error", err)
+		return
+	}
+
 	images := handlers.NewImages()
 	embeddings := handlers.NewEmbeddings(*client)
 	models := handlers.NewModels(*client, modelsStorage)
 	stages := handlers.NewStages(*client, stagesStorage)
+	motions := handlers.NewMotions(*client, motionsStorage)
 
 	app := NewApp(modelsStorage, stagesStorage)
 
@@ -59,6 +66,7 @@ func main() {
 			embeddings,
 			models,
 			stages,
+			motions,
 		},
 	})
 

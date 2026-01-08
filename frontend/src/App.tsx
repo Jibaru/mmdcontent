@@ -5,7 +5,7 @@ import { MainContent } from "@/components/shared/MainContent";
 
 export type ViewState = {
 	view: string;
-	detailType?: "model" | "stage";
+	detailType?: "model" | "stage" | "motion";
 	detailItem?: {
 		id: string;
 		name: string;
@@ -23,7 +23,7 @@ export default function App() {
 	};
 
 	const handleShowDetail = (
-		type: "model" | "stage",
+		type: "model" | "stage" | "motion",
 		item: {
 			id: string;
 			name: string;
@@ -44,6 +44,8 @@ export default function App() {
 			setViewState({ view: "models" });
 		} else if (viewState.detailType === "stage") {
 			setViewState({ view: "stages" });
+		} else if (viewState.detailType === "motion") {
+			setViewState({ view: "motions" });
 		}
 	};
 

@@ -5,6 +5,7 @@ import {
 	Layers,
 	Settings,
 	Sparkles,
+	Zap,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,7 @@ const menuItems = [
 	{ icon: LayoutDashboard, label: "Main Dashboard", view: "dashboard" },
 	{ icon: Box, label: "Models", view: "models" },
 	{ icon: Layers, label: "Stages", view: "stages" },
-	{ icon: Settings, label: "Settings", view: "settings" },
+	{ icon: Zap, label: "Motions", view: "motions" },
 ];
 
 export function Sidebar({ currentView, onViewChange }: SidebarProps) {
@@ -60,7 +61,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
 					<div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
 						<span className="text-white text-xl font-bold">⚡</span>
 					</div>
-					<span className="font-bold text-lg">Horizon AI</span>
+					<span className="font-bold text-lg">MMD Content</span>
 				</div>
 			</div>
 
@@ -126,37 +127,6 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
 					)}
 				</div>
 			</nav>
-
-			{/* User Profile */}
-			<div className="p-4 border-t border-border">
-				<div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
-					<Avatar>
-						<AvatarFallback className="bg-yellow-400 text-black">
-							AP
-						</AvatarFallback>
-					</Avatar>
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2">
-							<span className="text-sm font-medium">PRO Member</span>
-							<Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-								👑
-							</Badge>
-						</div>
-						<p className="text-xs text-muted-foreground">Unlimited plan active</p>
-					</div>
-				</div>
-				<div className="mt-2 flex items-center justify-between px-3">
-					<div className="flex items-center gap-2">
-						<Avatar className="w-6 h-6">
-							<AvatarFallback className="text-xs">AP</AvatarFallback>
-						</Avatar>
-						<span className="text-sm">Adela Parkson</span>
-					</div>
-					<button type="button" className="text-muted-foreground hover:text-foreground">
-						<Settings className="w-4 h-4" />
-					</button>
-				</div>
-			</div>
 		</div>
 	);
 }

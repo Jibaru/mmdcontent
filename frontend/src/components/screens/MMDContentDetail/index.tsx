@@ -7,7 +7,7 @@ import { ArrowLeft, Copy, FolderOpen, ZoomIn, ZoomOut, X } from "lucide-react";
 import { BrowserOpenURL } from "../../../../wailsjs/runtime/runtime";
 
 interface MMDContentDetailProps {
-	type: "model" | "stage";
+	type: "model" | "stage" | "motion";
 	item: {
 		id: string;
 		name: string;
