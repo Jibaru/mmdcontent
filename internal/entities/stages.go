@@ -13,7 +13,7 @@ func (m *Stage) Equal(o Stage) bool {
 	return m.ID == o.ID && m.Name == o.Name &&
 		m.Description == o.Description &&
 		m.OriginalPath == o.OriginalPath &&
-		len(m.Screenshots) == len(o.Screenshots) // TODO: improve here
+		equalSlices(m.Screenshots, o.Screenshots)
 }
 
 type StagesData struct {
