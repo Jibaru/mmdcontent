@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GetImageAsBase64 } from "../../../../wailsjs/go/handlers/Images";
+import { GetImageAsBase64, GetVideoAsBase64 } from "../../../../wailsjs/go/handlers/Images";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -11,7 +11,8 @@ interface MMDContentDetailProps {
 	item: {
 		id: string;
 		name: string;
-		screenshots: string[];
+		screenshots: string[] | null;
+		video?: string[] | null;
 		description: string;
 		originalPath: string;
 	};
@@ -20,9 +21,43 @@ interface MMDContentDetailProps {
 
 export function MMDContentDetail({ type, item, onBack }: MMDContentDetailProps) {
 	const [images, setImages] = useState<Map<number, string>>(new Map());
+	const [videos, setVideos] = useState<Map<number, string>>(new Map());
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 	const [zoomLevel, setZoomLevel] = useState(100);
 	const [loadingImages, setLoadingImages] = useState(true);
+	const [loadingVideos, setLoadingVideos] = useState(true);
+
+	// Normalize null to empty arrays
+	const normalizedScreenshots = item.screenshots ?? [];
+	const normalizedVideo = item.video ?? [];
+	const hasScreenshots = normalizedScreenshots.length > 0;
+	const hasVideo = normalizedVideo.length > 0;
+
+	// Load all videos
+	useEffect(() => {
+		const loadVideos = async () => {
+			setLoadingVideos(true);
+			const videoMap = new Map<number, string>();
+
+			for (let i = 0; i < normalizedVideo.length; i++) {
+				try {
+					const base64 = await GetVideoAsBase64(normalizedVideo[i]);
+					videoMap.set(i, base64);
+				} catch (error) {
+					console.error(`Error loading video ${i}:`, error);
+				}
+			}
+
+			setVideos(videoMap);
+			setLoadingVideos(false);
+		};
+
+		if (normalizedVideo.length > 0) {
+			loadVideos();
+		} else {
+			setLoadingVideos(false);
+		}
+	}, [normalizedVideo]);
 
 	// Load all images
 	useEffect(() => {
@@ -30,9 +65,9 @@ export function MMDContentDetail({ type, item, onBack }: MMDContentDetailProps) 
 			setLoadingImages(true);
 			const imageMap = new Map<number, string>();
 
-			for (let i = 0; i < item.screenshots.length; i++) {
+			for (let i = 0; i < normalizedScreenshots.length; i++) {
 				try {
-					const base64 = await GetImageAsBase64(item.screenshots[i]);
+					const base64 = await GetImageAsBase64(normalizedScreenshots[i]);
 					imageMap.set(i, base64);
 				} catch (error) {
 					console.error(`Error loading image ${i}:`, error);
@@ -43,8 +78,12 @@ export function MMDContentDetail({ type, item, onBack }: MMDContentDetailProps) 
 			setLoadingImages(false);
 		};
 
-		loadImages();
-	}, [item.screenshots]);
+		if (normalizedScreenshots.length > 0) {
+			loadImages();
+		} else {
+			setLoadingImages(false);
+		}
+	}, [normalizedScreenshots]);
 
 	const handleCopyPath = async () => {
 		try {
@@ -141,46 +180,102 @@ export function MMDContentDetail({ type, item, onBack }: MMDContentDetailProps) 
 				</CardContent>
 			</Card>
 
-			{/* Screenshots card */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Screenshots ({item.screenshots.length})</CardTitle>
-				</CardHeader>
-				<CardContent>
-					{loadingImages ? (
-						<div className="flex items-center justify-center h-64">
-							<div className="text-muted-foreground">Loading images...</div>
-						</div>
-					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-							{item.screenshots.map((_, index) => (
-								<div
-									key={index}
-									className="relative aspect-video bg-muted rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-									onClick={() => handleImageClick(index)}
-								>
-									{images.get(index) ? (
-										<img
-											src={images.get(index)}
-											alt={`Screenshot ${index + 1}`}
-											className="w-full h-full object-cover"
-										/>
-									) : (
-										<div className="w-full h-full flex items-center justify-center">
-											<span className="text-muted-foreground text-sm">
-												Loading...
-											</span>
+			{/* Videos card */}
+			{hasVideo && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Videos ({normalizedVideo.length})</CardTitle>
+					</CardHeader>
+					<CardContent>
+						{loadingVideos ? (
+							<div className="flex items-center justify-center h-64">
+								<div className="text-muted-foreground">Loading videos...</div>
+							</div>
+						) : (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								{normalizedVideo.map((_, index) => (
+									<div
+										key={index}
+										className="relative aspect-video bg-muted rounded-lg overflow-hidden"
+									>
+										{videos.get(index) ? (
+											<video
+												src={videos.get(index)}
+												controls
+												className="w-full h-full object-cover"
+												preload="metadata"
+											>
+												Your browser does not support the video tag.
+											</video>
+										) : (
+											<div className="w-full h-full flex items-center justify-center">
+												<span className="text-muted-foreground text-sm">
+													Loading...
+												</span>
+											</div>
+										)}
+										<div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+											{index + 1}
 										</div>
-									)}
-									<div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-										{index + 1}
 									</div>
-								</div>
-							))}
-						</div>
-					)}
-				</CardContent>
-			</Card>
+								))}
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Screenshots card */}
+			{hasScreenshots && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Screenshots ({normalizedScreenshots.length})</CardTitle>
+					</CardHeader>
+					<CardContent>
+						{loadingImages ? (
+							<div className="flex items-center justify-center h-64">
+								<div className="text-muted-foreground">Loading images...</div>
+							</div>
+						) : (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+								{normalizedScreenshots.map((_, index) => (
+									<div
+										key={index}
+										className="relative aspect-video bg-muted rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+										onClick={() => handleImageClick(index)}
+									>
+										{images.get(index) ? (
+											<img
+												src={images.get(index)}
+												alt={`Screenshot ${index + 1}`}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<div className="w-full h-full flex items-center justify-center">
+												<span className="text-muted-foreground text-sm">
+													Loading...
+												</span>
+											</div>
+										)}
+										<div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+											{index + 1}
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{/* No media message */}
+			{!hasVideo && !hasScreenshots && (
+				<Card>
+					<CardContent className="flex items-center justify-center h-64">
+						<div className="text-muted-foreground">No media available</div>
+					</CardContent>
+				</Card>
+			)}
 
 			{/* Image zoom modal */}
 			<Dialog open={selectedImageIndex !== null} onOpenChange={handleCloseModal}>
@@ -189,7 +284,7 @@ export function MMDContentDetail({ type, item, onBack }: MMDContentDetailProps) 
 						{/* Modal header */}
 						<div className="flex items-center justify-between p-4 bg-black/50">
 							<span className="text-white font-medium">
-								Screenshot {selectedImageIndex !== null ? selectedImageIndex + 1 : 0} of {item.screenshots.length}
+								Screenshot {selectedImageIndex !== null ? selectedImageIndex + 1 : 0} of {normalizedScreenshots.length}
 							</span>
 							<div className="flex items-center gap-2">
 								<Button

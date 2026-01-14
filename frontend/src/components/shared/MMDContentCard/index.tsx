@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GetImageAsBase64 } from "../../../../wailsjs/go/handlers/Images";
+import { GetImageAsBase64, GetVideoAsBase64 } from "../../../../wailsjs/go/handlers/Images";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -7,7 +7,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface MMDContentCardProps {
 	id: string;
 	name: string;
-	screenshots: string[];
+	screenshots: string[] | null;
+	video?: string[] | null;
 	description: string;
 	onClick?: () => void;
 }
@@ -16,6 +17,7 @@ export function MMDContentCard({
 	id,
 	name,
 	screenshots,
+	video,
 	description,
 	onClick,
 }: MMDContentCardProps) {
@@ -23,11 +25,44 @@ export function MMDContentCard({
 	const [loadedImages, setLoadedImages] = useState<Map<number, string>>(new Map());
 	const [loading, setLoading] = useState(true);
 	const [loadingImage, setLoadingImage] = useState(false);
+	const [videoSrc, setVideoSrc] = useState<string>("");
 
-	// Load the current image
+	// Normalize null to empty array for easier handling
+	const normalizedScreenshots = screenshots ?? [];
+	const normalizedVideo = video ?? [];
+
+	// Determine if we should show video (prefer video over screenshots)
+	const hasVideo = normalizedVideo.length > 0;
+	const hasScreenshots = normalizedScreenshots.length > 0;
+
+	// Load video (if available)
 	useEffect(() => {
+		if (!hasVideo) return;
+
+		const loadVideo = async () => {
+			setLoading(true);
+			try {
+				const base64Video = await GetVideoAsBase64(normalizedVideo[0]);
+				setVideoSrc(base64Video);
+			} catch (error) {
+				console.error(`Failed to load video for ${id}:`, error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadVideo();
+	}, [hasVideo, normalizedVideo, id]);
+
+	// Load the current image (only if no video)
+	useEffect(() => {
+		if (hasVideo) {
+			setLoading(false);
+			return;
+		}
+
 		const loadCurrentImage = async () => {
-			if (screenshots.length === 0) {
+			if (normalizedScreenshots.length === 0) {
 				setLoading(false);
 				return;
 			}
@@ -40,7 +75,7 @@ export function MMDContentCard({
 
 			setLoadingImage(true);
 			try {
-				const base64Image = await GetImageAsBase64(screenshots[currentImageIndex]);
+				const base64Image = await GetImageAsBase64(normalizedScreenshots[currentImageIndex]);
 				setLoadedImages(prev => new Map(prev).set(currentImageIndex, base64Image));
 			} catch (error) {
 				console.error(`Failed to load image ${currentImageIndex} for ${id}:`, error);
@@ -51,18 +86,18 @@ export function MMDContentCard({
 		};
 
 		loadCurrentImage();
-	}, [id, currentImageIndex, screenshots, loadedImages]);
+	}, [id, currentImageIndex, normalizedScreenshots, loadedImages, hasVideo]);
 
 	// Preload next image
 	useEffect(() => {
-		if (screenshots.length <= 1) return;
+		if (normalizedScreenshots.length <= 1) return;
 
-		const nextIndex = (currentImageIndex + 1) % screenshots.length;
+		const nextIndex = (currentImageIndex + 1) % normalizedScreenshots.length;
 		if (loadedImages.has(nextIndex)) return;
 
 		const preloadNext = async () => {
 			try {
-				const base64Image = await GetImageAsBase64(screenshots[nextIndex]);
+				const base64Image = await GetImageAsBase64(normalizedScreenshots[nextIndex]);
 				setLoadedImages(prev => new Map(prev).set(nextIndex, base64Image));
 			} catch (error) {
 				console.error(`Failed to preload image ${nextIndex} for ${id}:`, error);
@@ -70,19 +105,19 @@ export function MMDContentCard({
 		};
 
 		preloadNext();
-	}, [currentImageIndex, screenshots, loadedImages, id]);
+	}, [currentImageIndex, normalizedScreenshots, loadedImages, id]);
 
 	const handlePrevious = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		setCurrentImageIndex((prev) =>
-			prev === 0 ? screenshots.length - 1 : prev - 1
+			prev === 0 ? normalizedScreenshots.length - 1 : prev - 1
 		);
 	};
 
 	const handleNext = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		setCurrentImageIndex((prev) =>
-			(prev + 1) % screenshots.length
+			(prev + 1) % normalizedScreenshots.length
 		);
 	};
 
@@ -96,9 +131,28 @@ export function MMDContentCard({
 			onClick={onClick}
 		>
 			<CardContent className="p-0">
-				{/* Screenshot Carousel */}
+				{/* Media Display - Video or Screenshot Carousel */}
 				<div className="aspect-square bg-gray-100 relative group">
-					{currentImage ? (
+					{hasVideo ? (
+						/* Show first video when available */
+						videoSrc ? (
+							<video
+								src={videoSrc}
+								controls
+								className="w-full h-full object-cover"
+								preload="metadata"
+							>
+								Your browser does not support the video tag.
+							</video>
+						) : (
+							<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+								<div className="flex flex-col items-center gap-2">
+									<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+									<span className="text-xs">Loading video...</span>
+								</div>
+							</div>
+						)
+					) : currentImage ? (
 						<img
 							src={currentImage}
 							alt={`${name} - ${currentImageIndex + 1}`}
@@ -111,7 +165,7 @@ export function MMDContentCard({
 								<span className="text-xs">Loading...</span>
 							</div>
 						</div>
-					) : screenshots.length > 0 ? (
+					) : hasScreenshots ? (
 						<div className="w-full h-full flex items-center justify-center text-muted-foreground">
 							<div className="text-center">
 								<div className="text-sm">Failed to load</div>
@@ -120,7 +174,7 @@ export function MMDContentCard({
 						</div>
 					) : (
 						<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-							No screenshot
+							<div className="text-center text-sm">No media available</div>
 						</div>
 					)}
 
@@ -129,15 +183,20 @@ export function MMDContentCard({
 						ID: {id}
 					</div>
 
-					{/* Image Counter */}
-					{screenshots.length > 1 && (
+					{/* Media Counter */}
+					{hasVideo && normalizedVideo.length > 1 && (
 						<div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-							{currentImageIndex + 1} / {screenshots.length}
+							{normalizedVideo.length} video{normalizedVideo.length !== 1 ? 's' : ''}
+						</div>
+					)}
+					{!hasVideo && normalizedScreenshots.length > 1 && (
+						<div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+							{currentImageIndex + 1} / {normalizedScreenshots.length}
 						</div>
 					)}
 
-					{/* Carousel Navigation - Show on hover */}
-					{screenshots.length > 1 && currentImage && (
+					{/* Carousel Navigation - Show on hover (only for screenshots) */}
+					{!hasVideo && normalizedScreenshots.length > 1 && currentImage && (
 						<>
 							<Button
 								variant="ghost"
@@ -158,7 +217,7 @@ export function MMDContentCard({
 
 							{/* Dots Indicator */}
 							<div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-								{screenshots.map((_, index) => (
+								{normalizedScreenshots.map((_, index) => (
 									<button
 										type="button"
 										key={index}
@@ -188,7 +247,15 @@ export function MMDContentCard({
 						{description || "No description available"}
 					</p>
 					<div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-						<span>{screenshots.length} screenshot{screenshots.length !== 1 ? 's' : ''}</span>
+						{hasVideo && (
+							<span>{normalizedVideo.length} video{normalizedVideo.length !== 1 ? 's' : ''}</span>
+						)}
+						{hasScreenshots && (
+							<span>{normalizedScreenshots.length} screenshot{normalizedScreenshots.length !== 1 ? 's' : ''}</span>
+						)}
+						{!hasVideo && !hasScreenshots && (
+							<span>No media</span>
+						)}
 					</div>
 				</div>
 			</CardContent>

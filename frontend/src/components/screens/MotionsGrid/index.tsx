@@ -20,6 +20,7 @@ interface MotionsGridProps {
 			id: string;
 			name: string;
 			screenshots: string[];
+			video: string[];
 			description: string;
 			originalPath: string;
 		}
@@ -209,6 +210,7 @@ export function MotionsGrid({ onShowDetail }: MotionsGridProps) {
 							id={motion.id}
 							name={motion.name}
 							screenshots={motion.screenshots}
+							video={motion.video}
 							description={motion.description}
 							onClick={() => onShowDetail("motion", motion)}
 						/>

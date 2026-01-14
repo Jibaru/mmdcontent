@@ -26,6 +26,7 @@ export namespace entities {
 	    id: string;
 	    name: string;
 	    screenshots: string[];
+	    video: string[];
 	    description: string;
 	    originalPath: string;
 	    embedding?: number[];
@@ -39,6 +40,7 @@ export namespace entities {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.screenshots = source["screenshots"];
+	        this.video = source["video"];
 	        this.description = source["description"];
 	        this.originalPath = source["originalPath"];
 	        this.embedding = source["embedding"];

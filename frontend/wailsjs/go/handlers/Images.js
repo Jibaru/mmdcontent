@@ -5,3 +5,7 @@
 export function GetImageAsBase64(arg1) {
   return window['go']['handlers']['Images']['GetImageAsBase64'](arg1);
 }
+
+export function GetVideoAsBase64(arg1) {
+  return window['go']['handlers']['Images']['GetVideoAsBase64'](arg1);
+}

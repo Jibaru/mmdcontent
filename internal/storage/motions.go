@@ -195,10 +195,30 @@ func readMotionsDataFromFolder(dirName string) (*entities.MotionsData, error) {
 		// Sort screenshots
 		sort.Strings(screenshots)
 
+		// Read video files
+		videoDir := filepath.Join(motionPath, "video")
+		var video []string
+		videoEntries, err := os.ReadDir(videoDir)
+		if err == nil {
+			for _, ve := range videoEntries {
+				if !ve.IsDir() {
+					// Store absolute path
+					absPath, err := filepath.Abs(filepath.Join(videoDir, ve.Name()))
+					if err == nil {
+						video = append(video, absPath)
+					}
+				}
+			}
+		}
+
+		// Sort video files
+		sort.Strings(video)
+
 		motion := entities.Motion{
 			ID:           motionID,
 			Name:         motionName,
 			Screenshots:  screenshots,
+			Video:        video,
 			Description:  description,
 			OriginalPath: rutaStr,
 		}
