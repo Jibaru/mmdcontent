@@ -33,7 +33,7 @@ export function StagesGrid({ onShowDetail }: StagesGridProps) {
 	const [loading, setLoading] = useState(true);
 	const [searching, setSearching] = useState(false);
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(100);
+	const [perPage, setPerPage] = useState(10);
 	const [searchQuery, setSearchQuery] = useState("");
 
 	const loadStages = async () => {
@@ -168,9 +168,10 @@ export function StagesGrid({ onShowDetail }: StagesGridProps) {
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
+								<SelectItem value="5">5 per page</SelectItem>
+								<SelectItem value="10">10 per page</SelectItem>
+								<SelectItem value="50">50 per page</SelectItem>
 								<SelectItem value="100">100 per page</SelectItem>
-								<SelectItem value="1000">1000 per page</SelectItem>
-								<SelectItem value="10000">10000 per page</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
